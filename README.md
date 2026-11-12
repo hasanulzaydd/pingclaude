@@ -1,9 +1,17 @@
 # pingclaude
 
-A small local tool that sends a short message (`.` by default) to Claude Code on a
-fixed schedule, every **5h30m** unless you change it. It runs the official `claude`
-CLI with **your own existing login**: you set it once (or press one button) and it
-keeps going by itself, including after you restart your computer.
+**Start your Claude usage window before you start working.**
+
+Claude's usage limits run in session windows that begin with your first message. If
+your first message of the day is the moment you sit down to work, the window opens
+then, and once you hit the limit you're stuck waiting for it to reset. pingclaude sends
+a tiny message (`.`) for you **ahead of time**, so a window is already running when you
+start. You use up that window, it resets partway through your workday, and you
+continue on a fresh one. [See how it works below.](#why)
+
+It runs the official `claude` CLI with **your own existing login**. You set it once
+(or press one button) and it keeps going by itself, every **5h30m** by default,
+including after you restart your computer.
 
 - Works on **Windows, macOS and Linux**
 - **One-button setup** with a small settings window, or a full command line if you prefer
@@ -45,10 +53,49 @@ keeps going by itself, including after you restart your computer.
 
 ## Why
 
-Claude plans measure usage in time windows. Some people like their window to start
-at a predictable time, for example a little before they begin work, instead of
-whenever they happen to send their first message. pingclaude does that by sending a
-tiny message on a schedule you choose.
+### The problem
+
+On Claude's paid plans, usage is measured in **session windows** of about **5 hours**.
+A window starts with your **first message**. Within one window you can only use so
+much; once you hit the limit, you wait until the window resets.
+
+So if you sit down at 10:00 and send your first message then, your window runs from
+10:00 to 15:00. Have a heavy morning, hit the limit at 12:00, and you're **stuck until
+15:00**, three hours with no Claude in the middle of your workday.
+
+### The fix
+
+Start the window **before** you start working. pingclaude sends a single `.` at a time
+you choose, so the window is already running when you sit down. You use that window,
+it resets during your workday, and your next message starts a **fresh** one.
+
+### Example: a 10:00–17:00 workday
+
+| | Without pingclaude | With pingclaude (first send at 07:00) |
+|---|---|---|
+| 07:00 | – | pingclaude sends `.`, so **window 1 starts** (07:00–12:00) |
+| 10:00 | You start; **window 1 starts** (10:00–15:00) | You start; window 1 has 2 hours left |
+| 12:00 | You hit the limit and **wait until 15:00** | Window 1 ends; your next message starts **window 2** (12:00–17:00) with a full limit |
+| 15:00 | Window resets; you get 2 hours before 17:00 | Still working on window 2 |
+| **Result** | 3 hours blocked in the middle of the day | A full window for the first 2 hours, then **another full window** for the rest of the day |
+
+You get roughly **two windows' worth** of usage in one workday instead of being cut
+off halfway. Nothing is used up by the ping itself beyond one tiny message.
+
+### Choosing your times
+
+- **First send:** about **2–3 hours before you start work**. Pick a time when your
+  computer is on and awake: the ping can't be sent while it's off or asleep.
+  - Start at 09:00 → first send around 06:00–07:00.
+  - Start at 13:00 → first send around 10:00–11:00.
+- **Gap:** the default **5h30m** sends the next ping just after a window would have
+  ended, so if you're away, a new window starts again shortly after. If you're working
+  at the time, the ping lands inside your current window and changes nothing.
+- **Just want a window running whenever you log in?** Choose **Right away** for
+  the first send.
+
+> Anthropic sets and can change how usage windows and limits work. Check the current
+> details for your plan; pingclaude only sends the message, it doesn't change your limits.
 
 ## Requirements
 
@@ -94,7 +141,8 @@ pip install ".[tray]"      # core + tray icon
    - **macOS:** double-click **`PingClaude.command`** (the first time, right-click it,
      choose **Open**, then **Open** again, because macOS blocks unsigned scripts on first launch)
    - **Linux / any OS:** `python3 pingclaude.py gui`
-2. Choose the gap and when the first message should go out.
+2. Choose when the first message should go out (about 2–3 hours before you start
+   work; see [Choosing your times](#choosing-your-times)) and the gap.
 3. Press **Turn on** and confirm.
 
 Done. pingclaude starts in the background right away and again every time you log in.
@@ -127,10 +175,11 @@ that works depends on **where** you ask, because Claude needs to run commands on
 ```text
 Install pingclaude from https://github.com/hasanulzaydd/pingclaude on this computer.
 Clone it into a permanent folder, follow the "Steps for Claude" section of its README,
-and turn it on with a 5h30m gap and the first send right away.
+and turn it on with a 5h30m gap and the first send at 07:00.
 ```
 
-Change the gap or add a start time (e.g. "first send at 06:00") to taste.
+Pick a first-send time about 2–3 hours before you usually start work, or say
+"right away" to start a window whenever you log in.
 
 **What to expect:**
 - Claude Code asks your permission before running commands. That's normal; read
@@ -179,12 +228,15 @@ settings.
 | **Send every** | The gap between messages, in hours and minutes. Use **−** / **+** or type a number (minutes step by 5). |
 | **First send** | A toggle: **Right away**, or **At a set time** with an HH:MM box next to it (24-hour clock). See [start times](#start-times). |
 | **Message** | The text to send. Default `.` |
-| **Command** | The command that does the sending. Default `claude -p --no-session-persistence`. |
 | **Retries** | How many extra attempts after a failure (60 seconds apart), 0–20. Default 3. |
 | **Turn on** / **Save changes** | Saves the settings, sets up auto-start (asks first, showing exactly what it will create) and starts it. If it's already on, the button reads **Save changes**: it just saves, and the running copy uses the new settings within 30 seconds. |
 | **Turn off** | Stops it and removes auto-start (asks first). Your settings are kept. |
 | **Send now** | Sends one message immediately, without changing the schedule. |
 | **Open log** | Opens the log file. |
+
+The window doesn't show the command that does the sending, so it can't be broken by
+accident. It always uses `claude -p --no-session-persistence` unless you've changed it
+from the [command line](#flags).
 
 ## Command line
 
@@ -216,7 +268,7 @@ project folder as `python pingclaude.py …` (or `python3` on macOS/Linux), or j
 | `--start-at HH:MM` | send now | run, install, config | First send at the next occurrence of this local time. `now` clears it. |
 | `--count N` | forever | run | Stop after N sends. |
 | `--retries N` | `3` | run, send, install, config | Extra attempts after a failure, 60s apart (0–20). |
-| `--command CMD` | `claude -p --no-session-persistence` | run, send, install, config | The command to run. The message is added as the last argument. |
+| `--command CMD` | `claude -p --no-session-persistence` | run, send, install, config | Advanced: the command to run. The message is added as the last argument. `default` (or an empty value) puts the default back. |
 | `--dry-run` | off | run | Log what would happen, but send nothing. |
 | `-y`, `--yes` | off | install, uninstall | Don't ask for confirmation. |
 | `--tray` | off | install | Auto-start the tray icon instead of the hidden runner. |
@@ -244,6 +296,9 @@ python pingclaude.py config --start-at now
 
 # Use a specific model for the pings
 python pingclaude.py config --command "claude -p --no-session-persistence --model haiku"
+
+# Put the default command back
+python pingclaude.py config --command default
 
 # Check on it
 python pingclaude.py status
@@ -273,7 +328,7 @@ Settings live in `~/.pingclaude/config.json` (on Windows,
 | `message` | text | What to send. Must not be empty. |
 | `start_at` | `"HH:MM"` or `null` | Time of the first send, or `null` for right away. |
 | `retries` | number 0–20 | Extra attempts after a failure. |
-| `command` | text | The command to run; the message is appended. |
+| `command` | text | The command to run; the message is appended. Empty or `"default"` means the default. |
 
 You can edit the file by hand, use the window, or use `pingclaude config`. Invalid
 values are rejected with a clear message. If you break the file while pingclaude
