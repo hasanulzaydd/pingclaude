@@ -1,13 +1,12 @@
 # pingclaude
 
-**Start your Claude usage window before you start working.**
+**Get two Claude sessions' worth of usage in one sitting.**
 
-Claude's usage limits run in session windows that begin with your first message. If
-your first message of the day is the moment you sit down to work, the window opens
-then, and once you hit the limit you're stuck waiting for it to reset. pingclaude sends
-a tiny message (`.`) for you **ahead of time**, so a window is already running when you
-start. You use up that window, it resets partway through your workday, and you
-continue on a fresh one. [See how it works below.](#why)
+A Claude session starts with your first message and resets 5 hours later, but a busy
+stretch of work can take it to **100% used** in an hour or two. Then you wait for the
+reset. pingclaude sends a tiny message (`.`) **before** you start working, so the
+session is already running. When you sit down it's still at **0% used**, and it resets
+soon after, so you go straight on to a second session at 0%. [See the example below.](#why)
 
 It runs the official `claude` CLI with **your own existing login**. You set it once
 (or press one button) and it keeps going by itself, every **5h30m** by default,
@@ -53,34 +52,26 @@ including after you restart your computer.
 
 ## Why
 
-### The problem
+**It doesn't take 5 hours to reach 100% session usage, but it does take 5 hours for
+the session to reset.** So the best time to start a session is *before* you need it.
 
-On Claude's paid plans, usage is measured in **session windows** of about **5 hours**.
-A window starts with your **first message**. Within one window you can only use so
-much; once you hit the limit, you wait until the window resets.
+A Claude session starts with your first message and resets 5 hours later. If that first
+message is the moment you start working, you might reach 100% used in two hours and
+then wait three for the reset. pingclaude starts the session earlier, while you're not
+using Claude. It stays at 0% used while the reset clock runs, so by the time you've
+used it all, a fresh session is about to start.
 
-So if you sit down at 10:00 and send your first message then, your window runs from
-10:00 to 15:00. Have a heavy morning, hit the limit at 12:00, and you're **stuck until
-15:00**, three hours with no Claude in the middle of your workday.
+### Example: you decide to work at 03:00
 
-### The fix
-
-Start the window **before** you start working. pingclaude sends a single `.` at a time
-you choose, so the window is already running when you sit down. You use that window,
-it resets during your workday, and your next message starts a **fresh** one.
-
-### Example: a 10:00–17:00 workday
-
-| | Without pingclaude | With pingclaude (first send at 07:00) |
+| Time | Without pingclaude | With pingclaude (sends `.` at 00:00) |
 |---|---|---|
-| 07:00 | – | pingclaude sends `.`, so **window 1 starts** (07:00–12:00) |
-| 10:00 | You start; **window 1 starts** (10:00–15:00) | You start; window 1 has 2 hours left |
-| 12:00 | You hit the limit and **wait until 15:00** | Window 1 ends; your next message starts **window 2** (12:00–17:00) with a full limit |
-| 15:00 | Window resets; you get 2 hours before 17:00 | Still working on window 2 |
-| **Result** | 3 hours blocked in the middle of the day | A full window for the first 2 hours, then **another full window** for the rest of the day |
+| 00:00 | – | **Session 1 starts**: 0% used, resets at 05:00 |
+| 03:00 | You start, so **session 1 starts**: 0% used, resets at 08:00 | You start. Session 1: **0% used**, resets in 2 hours |
+| 05:00 | Session 1: **100% used**. Resets at 08:00, so **you wait 3 hours** | Session 1: 100% used, and it **resets now**. **Session 2 starts**: 0% used |
+| 07:00 | Still waiting at 100% used | Still working in session 2 |
+| **Result** | **1 session** of usage, then a 3-hour wait | **2 sessions** of usage, no waiting |
 
-You get roughly **two windows' worth** of usage in one workday instead of being cut
-off halfway. Nothing is used up by the ping itself beyond one tiny message.
+The `.` itself is a tiny message, so session 1 is still at about 0% used when you start.
 
 ### Choosing your times
 
@@ -88,13 +79,13 @@ off halfway. Nothing is used up by the ping itself beyond one tiny message.
   computer is on and awake: the ping can't be sent while it's off or asleep.
   - Start at 09:00 → first send around 06:00–07:00.
   - Start at 13:00 → first send around 10:00–11:00.
-- **Gap:** the default **5h30m** sends the next ping just after a window would have
-  ended, so if you're away, a new window starts again shortly after. If you're working
-  at the time, the ping lands inside your current window and changes nothing.
-- **Just want a window running whenever you log in?** Choose **Right away** for
+- **Gap:** the default **5h30m** sends the next ping just after a session would have
+  reset, so if you're away, a new session starts again shortly after. If you're working
+  at the time, the ping lands inside your current session and changes nothing.
+- **Just want a session running whenever you log in?** Choose **Right away** for
   the first send.
 
-> Anthropic sets and can change how usage windows and limits work. Check the current
+> Anthropic sets and can change how sessions and usage limits work. Check the current
 > details for your plan; pingclaude only sends the message, it doesn't change your limits.
 
 ## Requirements
@@ -179,7 +170,7 @@ and turn it on with a 5h30m gap and the first send at 07:00.
 ```
 
 Pick a first-send time about 2–3 hours before you usually start work, or say
-"right away" to start a window whenever you log in.
+"right away" to start a session whenever you log in.
 
 **What to expect:**
 - Claude Code asks your permission before running commands. That's normal; read
