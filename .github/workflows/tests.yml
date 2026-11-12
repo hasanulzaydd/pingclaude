@@ -11,10 +11,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python: ["3.9", "3.13"]
+        python: ["3.10", "3.13"]
         include:
+          # oldest versions each runner image still provides
           - os: windows-latest
             python: "3.8"
+          - os: macos-latest
+            python: "3.9"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

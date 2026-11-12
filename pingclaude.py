@@ -678,12 +678,15 @@ class Scheduler:
         old = self.settings
         if new == old:
             return
-        argv = resolve_command(new.command)
-        if argv is None and not self.dry_run:
-            self.log("Ignoring new command %r: not found on PATH." % new.command)
-            return
-        if argv is not None:
-            self.argv = argv
+        if new.command != old.command:  # only re-check the program when it actually changed
+            argv = resolve_command(new.command)
+            if argv is None and not self.dry_run:
+                self.log("Ignoring new command %r: not found on PATH." % new.command)
+                new = Settings.from_dict(dict(new.to_config(), command=old.command))
+            elif argv is not None:
+                self.argv = argv
+            if new == old:
+                return
         self.settings = new
         changed = ", ".join(
             "%s=%r" % (k, v) for k, v in new.to_config().items() if old.to_config().get(k) != v

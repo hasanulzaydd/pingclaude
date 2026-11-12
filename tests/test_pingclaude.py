@@ -417,3 +417,28 @@ def test_other_failures_are_not_retried_without_flag():
 
     assert pc.send_once(["claude", "-p", pc.NO_HISTORY_FLAG], ".", run=run)[0] is False
     assert len(calls) == 1
+
+
+def test_config_change_works_without_claude_on_path(clock, monkeypatch):
+    # CI machines have no claude; a gap change must still apply.
+    monkeypatch.setattr(pc.shutil, "which", lambda name: None)
+    run = recording_run(clock)
+    sched, logs = make_scheduler(clock, interval="1h", count=2, run=run)
+    start = clock.now
+    pending = [pc.Settings.from_dict({"interval": "10m"})]
+    sched.reload = lambda: pending.pop() if pending and run.calls else None
+    sched.run()
+    assert run.calls == [start, start + 600]
+
+
+def test_bad_new_command_keeps_old_command_but_applies_rest(clock, monkeypatch):
+    monkeypatch.setattr(pc.shutil, "which", lambda name: None)
+    run = recording_run(clock)
+    sched, logs = make_scheduler(clock, interval="1h", count=2, run=run)
+    start = clock.now
+    pending = [pc.Settings.from_dict({"interval": "10m", "command": "nope -p"})]
+    sched.reload = lambda: pending.pop() if pending and run.calls else None
+    sched.run()
+    assert run.calls == [start, start + 600]
+    assert sched.settings.command == pc.DEFAULTS["command"]
+    assert any("Ignoring new command" in line for line in logs)
