@@ -210,7 +210,7 @@ class SettingsWindow:
         pad = px(22)
         card_top = y
         y += pad
-        labels = ("Send every", "First send", "Message", "Command", "Retries")
+        labels = ("Send every", "First send", "Message", "Retries")
         field_x = left + pad + max(self.font_label.measure(t) for t in labels) + px(22)
         field_w = right - pad - field_x
 
@@ -228,8 +228,9 @@ class SettingsWindow:
 
         self.message = tk.StringVar()
         y = self._row(y, "Message", left + pad, [self._entry(self.message, width=10)], field_x, field_w)
+        # The command isn't shown: the window always keeps whatever is saved (normally the
+        # default). Power users can change it with `pingclaude config --command ...`.
         self.command = tk.StringVar()
-        y = self._row(y, "Command", left + pad, [self._entry(self.command, width=10)], field_x, field_w)
         self.retries = tk.StringVar()
         y = self._row(y, "Retries", left + pad, [self._stepper(self.retries, 0, 20, 1)], field_x, last=True)
         card_bottom = y + pad

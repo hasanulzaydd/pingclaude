@@ -442,3 +442,15 @@ def test_bad_new_command_keeps_old_command_but_applies_rest(clock, monkeypatch):
     assert run.calls == [start, start + 600]
     assert sched.settings.command == pc.DEFAULTS["command"]
     assert any("Ignoring new command" in line for line in logs)
+
+
+@pytest.mark.parametrize("value", ["", "   ", "default", "DEFAULT", None])
+def test_blank_or_default_command_resets_to_default(value):
+    assert pc.Settings.from_dict({"command": value}).command == pc.DEFAULTS["command"]
+
+
+def test_cli_can_reset_command():
+    pc.main(["config", "--command", "claude -p --model haiku"])
+    assert pc.load_config()["command"] == "claude -p --model haiku"
+    pc.main(["config", "--command", "default"])
+    assert pc.load_config()["command"] == pc.DEFAULTS["command"]

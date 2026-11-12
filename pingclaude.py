@@ -262,8 +262,10 @@ class Settings:
             raise ConfigError("retries must be between 0 and 20")
 
         command = merged["command"]
-        if not isinstance(command, str) or not command.strip():
-            raise ConfigError("command must not be empty")
+        if command is None or (isinstance(command, str) and command.strip().lower() in ("", "default")):
+            command = DEFAULTS["command"]  # blank or "default" resets it
+        if not isinstance(command, str):
+            raise ConfigError("command must be text")
 
         return cls(interval, format_duration(interval), message, start_at, retries, command.strip())
 
@@ -877,7 +879,7 @@ def _add_setting_flags(parser: argparse.ArgumentParser, start_at: bool = True) -
             help="first send at the next occurrence of this local time ('now' = send right away)",
         )
     parser.add_argument("--retries", type=int, help="extra attempts after a failure, 60s apart (default 3)")
-    parser.add_argument("--command", dest="claude_command", metavar="CMD", help="command to run (default 'claude -p %s')" % NO_HISTORY_FLAG)
+    parser.add_argument("--command", dest="claude_command", metavar="CMD", help="command to run (default 'claude -p %s'; 'default' resets it)" % NO_HISTORY_FLAG)
 
 
 def make_parser(command: str) -> argparse.ArgumentParser:
