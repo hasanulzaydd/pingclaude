@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pingclaude"
+version = "0.1.0"
+description = "Send a short message to Claude Code on a fixed schedule, using your own claude login."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Environment :: Console",
+]
+
+[project.optional-dependencies]
+tray = ["pystray>=0.19", "Pillow>=9"]
+test = ["pytest>=7"]
+
+[project.scripts]
+pingclaude = "pingclaude:main"
+
+[project.gui-scripts]
+pingclaude-gui = "pingclaude_gui:main"
+pingclaude-tray = "pingclaude_tray:main"
+
+[tool.setuptools]
+py-modules = ["pingclaude", "pingclaude_autostart", "pingclaude_gui", "pingclaude_tray"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
